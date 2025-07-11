@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milad's Developer Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Source Code Pro', monospace;
+            background-color: #1e1e1e;
+            color: #cccccc;
+            overflow: hidden;
+        }
+        
+        .cmd-header {
+            background: linear-gradient(to right, #0a0a0a, #1a1a1a);
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        
+        .cmd-body {
+            background-color: #0c0c0c;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .cmd-input {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            color: #cccccc;
+            width: 80%;
+        }
+        
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .window {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+        
+        .scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scrollbar::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 4px;
+        }
+        
+        .typewriter {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: .15em;
+        }
+    </style>
+</head>
+<body class="p-4 h-screen flex items-center justify-center">
+    <div class="window w-full max-w-4xl">
+        <div class="cmd-header flex items-center justify-between p-2">
+            <div class="flex items-center">
+                <div class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+            </div>
+            <div class="text-sm text-gray-400">Command Prompt - milad</div>
+            <div class="w-12"></div>
+        </div>
+        
+        <div class="cmd-body p-4 scrollbar" id="terminal">
+            <div class="mb-2">
+                <span class="text-green-400">milad@portfolio</span>
+                <span class="text-purple-400">:</span>
+                <span class="text-blue-400">~</span>
+                <span class="text-purple-400">$</span>
+                <span class="ml-2 typewriter" id="initial-command">Welcome to Milad's Developer Portfolio (type 'help' for commands)</span>
+            </div>
+            
+            <div id="output">
+            </div>
+            
+            <div class="flex items-center mt-4" id="input-line">
+                <span class="text-green-400">milad@portfolio</span>
+                <span class="text-purple-400">:</span>
+                <span class="text-blue-400">~</span>
+                <span class="text-purple-400">$</span>
+                <span class="ml-2">_</span>
+                <input type="text" class="cmd-input ml-1 flex-grow" id="command-input" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const terminal = document.getElementById('terminal');
+            const output = document.getElementById('output');
+            const commandInput = document.getElementById('command-input');
+            const initialCommand = document.getElementById('initial-command');
+            
+            typeWriter("Welcome to Milad's Developer Portfolio (type 'help' for commands)", initialCommand);
+            
+            let commandHistory = [];
+            let historyIndex = -1;
+            
+            const commands = {
+                help: {
+                    description: "List all available commands",
+                    execute: () => {
+                        addOutput("Available commands:");
+                        for (const cmd in commands) {
+                            addOutput(`<span class="text-yellow-400">${cmd}</span> - ${commands[cmd].description}`);
+                        }
+                    }
+                },
+                about: {
+                    description: "Show information about Milad",
+                    execute: () => {
+                        addOutput("<span class='text-green-400'>About Milad:</span>");
+                        addOutput("Name: Milad");
+                        addOutput("Age: 20 years old");
+                        addOutput("Location: Tehran, Eslamshahr");
+                        addOutput("Interests: Programming, Software Development, AI");
+                    }
+                },
+                education: {
+                    description: "Show Milad's education background",
+                    execute: () => {
+                        addOutput("<span class='text-green-400'>Education:</span>");
+                        addOutput("Student of Computer Engineering at Islamic Azad University");
+                        addOutput("Completed courses:");
+                        addOutput("- Python programming (Quera)");
+                        addOutput("- C++ programming (Quera)");
+                    }
+                },
+                projects: {
+                    description: "Show Milad's projects",
+                    execute: () => {
+                        addOutput("<span class='text-green-400'>Projects:</span>");
+                        addOutput("1. Web-based games using HTML, CSS, JS");
+                        addOutput("2. Desktop management applications with Python");
+                        addOutput("3. Image processing with Python");
+                        addOutput("4. Currently working on Autox project (Project owner and team leader)");
+                    }
+                },
+                experience: {
+                    description: "Show Milad's work experience",
+                    execute: () => {
+                        addOutput("<span class='text-green-400'>Work Experience:</span>");
+                        addOutput("Backend Intern at Nahal IT Company (6 months)");
+                        addOutput("- Worked on server-side development");
+                        addOutput("- Gained experience in database management");
+                    }
+                },
+                clear: {
+                    description: "Clear the terminal screen",
+                    execute: () => {
+                        output.innerHTML = '';
+                    }
+                },
+                contact: {
+                    description: "Show contact information",
+                    execute: () => {
+                        addOutput("<span class='text-green-400'>Contact:</span>");
+                        addOutput("Email: milad@example.com");
+                        addOutput("GitHub: github.com/milad");
+                        addOutput("LinkedIn: linkedin.com/in/milad");
+                    }
+                },
+                gui: {
+                    description: "Switch to graphical interface (just kidding!)",
+                    execute: () => {
+                        addOutput("Error: GUI mode not supported. This is a terminal-only portfolio!");
+                        addOutput("(But you can check out my projects with the 'projects' command)");
+                    }
+                }
+            };
+            
+            commandInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const command = commandInput.value.trim();
+                    if (command) {
+                        commandHistory.push(command);
+                        historyIndex = commandHistory.length;
+                        
+                        addOutput(`<span class="text-green-400">milad@portfolio</span><span class="text-purple-400">:</span><span class="text-blue-400">~</span><span class="text-purple-400">$</span> ${command}`);
+                        
+                        if (commands[command]) {
+                            commands[command].execute();
+                        } else {
+                            addOutput(`<span class="text-red-400">Command not found: ${command}</span>. Type 'help' for available commands.`);
+                        }
+                        
+                        commandInput.value = '';
+                        
+                        terminal.scrollTop = terminal.scrollHeight;
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    if (commandHistory.length > 0) {
+                        if (historyIndex > 0) historyIndex--;
+                        commandInput.value = commandHistory[historyIndex] || '';
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    if (commandHistory.length > 0) {
+                        if (historyIndex < commandHistory.length - 1) historyIndex++;
+                        commandInput.value = commandHistory[historyIndex] || '';
+                        if (historyIndex === commandHistory.length - 1) commandInput.value = '';
+                    }
+                }
+            });
+            
+            function addOutput(text) {
+                const line = document.createElement('div');
+                line.className = 'mb-2';
+                line.innerHTML = text;
+                output.appendChild(line);
+            }
+            
+            function typeWriter(text, element, speed = 50) {
+                let i = 0;
+                element.innerHTML = '';
+                const typing = setInterval(() => {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                    } else {
+                        clearInterval(typing);
+                    }
+                }, speed);
+            }
+            
+            terminal.addEventListener('click', function() {
+                commandInput.focus();
+            });
+            
+            setTimeout(() => {
+                commands.help.execute();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
